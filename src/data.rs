@@ -325,6 +325,7 @@ pub(crate) mod parsing {
         pub fn parse_named(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
+            let mutability: FieldMutability = input.parse()?;
 
             let unnamed_field = cfg!(feature = "full") && input.peek(Token![_]);
             let ident = if unnamed_field {
@@ -350,7 +351,7 @@ pub(crate) mod parsing {
             Ok(Field {
                 attrs,
                 vis,
-                mutability: FieldMutability::None,
+                mutability,
                 ident: Some(ident),
                 colon_token: Some(colon_token),
                 ty,
