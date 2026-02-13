@@ -81,7 +81,7 @@ pub(crate) mod parsing {
     use crate::parse::{Parse, ParseStream};
     use crate::path::Path;
     use crate::restriction::{VisRestricted, Visibility};
-    use crate::token;
+    use crate::{token, FieldMutability, MutRestricted};
     use alloc::boxed::Box;
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
@@ -159,13 +159,35 @@ pub(crate) mod parsing {
             }
         }
     }
+
+    impl Parse for FieldMutability {
+        fn parse(input: ParseStream) -> Result<Self> {
+            if input.peek(Token![mut]) {
+                Ok(Self::Restricted(input.parse()?))
+            } else {
+                Ok(Self::None)
+            }
+        }
+    }
+
+    impl Parse for MutRestricted {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let content;
+            Ok(MutRestricted {
+                mut_token: input.parse()?,
+                paren_token: syn::parenthesized!(content in input),
+                in_token: content.parse()?,
+                path: content.parse()?,
+            })
+        }
+    }
 }
 
 #[cfg(feature = "printing")]
 mod printing {
-    use crate::path;
     use crate::path::printing::PathStyle;
     use crate::restriction::{VisRestricted, Visibility};
+    use crate::{path, FieldMutability, MutRestricted};
     use proc_macro2::TokenStream;
     use quote::ToTokens;
 
@@ -190,6 +212,27 @@ mod printing {
                 self.in_token.to_tokens(tokens);
                 path::printing::print_path(tokens, &self.path, PathStyle::Mod);
             });
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for FieldMutability {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                FieldMutability::None => {}
+                FieldMutability::Restricted(mut_restricted) => mut_restricted.to_tokens(tokens),
+            }
+        }
+    }
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for MutRestricted {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            self.mut_token.to_tokens(tokens);
+            self.paren_token
+                .surround(tokens, |tokens: &mut TokenStream| {
+                    self.in_token.to_tokens(tokens);
+                    path::printing::print_path(tokens, &self.path, PathStyle::Mod);
+                });
         }
     }
 }
