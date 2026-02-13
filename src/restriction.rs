@@ -37,6 +37,20 @@ ast_struct! {
     }
 }
 
+ast_struct! {
+
+    /// Mutability that is restricted to some path: `pub(self)` or
+    /// `pub(super)` or `pub(crate)` or `pub(in some::module)`.
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
+    pub struct MutRestricted {
+        pub mut_token: Token![mut],
+        pub paren_token: token::Paren,
+        pub in_token: Option<Token![in]>,
+        pub path: Box<Path>,
+    }
+
+}
+
 ast_enum! {
     /// Unused, but reserved for RFC 3323 restrictions.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
@@ -44,6 +58,7 @@ ast_enum! {
     pub enum FieldMutability {
         None,
 
+        Restricted(MutRestricted)
         // TODO: https://rust-lang.github.io/rfcs/3323-restrictions.html
         //
         // FieldMutability::Restricted(MutRestricted)

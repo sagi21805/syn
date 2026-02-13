@@ -1215,6 +1215,11 @@ impl Debug for crate::FieldMutability {
         formatter.write_str("FieldMutability::")?;
         match self {
             crate::FieldMutability::None => formatter.write_str("None"),
+            crate::FieldMutability::Restricted(v0) => {
+                let mut formatter = formatter.debug_tuple("Restricted");
+                formatter.field(v0);
+                formatter.finish()
+            }
         }
     }
 }
@@ -2139,6 +2144,18 @@ impl crate::MetaNameValue {
         formatter.field("path", &self.path);
         formatter.field("eq_token", &self.eq_token);
         formatter.field("value", &self.value);
+        formatter.finish()
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::MutRestricted {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("MutRestricted");
+        formatter.field("mut_token", &self.mut_token);
+        formatter.field("paren_token", &self.paren_token);
+        formatter.field("in_token", &self.in_token);
+        formatter.field("path", &self.path);
         formatter.finish()
     }
 }

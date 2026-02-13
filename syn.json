@@ -2022,7 +2022,12 @@
         ]
       },
       "variants": {
-        "None": []
+        "None": [],
+        "Restricted": [
+          {
+            "syn": "MutRestricted"
+          }
+        ]
       },
       "exhaustive": false
     },
@@ -3710,6 +3715,33 @@
         },
         "value": {
           "syn": "Expr"
+        }
+      }
+    },
+    {
+      "ident": "MutRestricted",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {
+        "mut_token": {
+          "token": "Mut"
+        },
+        "paren_token": {
+          "group": "Paren"
+        },
+        "in_token": {
+          "option": {
+            "token": "In"
+          }
+        },
+        "path": {
+          "box": {
+            "syn": "Path"
+          }
         }
       }
     },

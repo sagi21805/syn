@@ -511,7 +511,7 @@ pub mod punctuated;
 mod restriction;
 #[cfg(any(feature = "full", feature = "derive"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
-pub use crate::restriction::{FieldMutability, VisRestricted, Visibility};
+pub use crate::restriction::{FieldMutability, MutRestricted, VisRestricted, Visibility};
 
 mod sealed;
 

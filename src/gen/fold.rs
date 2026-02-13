@@ -658,6 +658,11 @@ pub trait Fold {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn fold_mut_restricted(&mut self, i: crate::MutRestricted) -> crate::MutRestricted {
+        fold_mut_restricted(self, i)
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_parenthesized_generic_arguments(
         &mut self,
         i: crate::ParenthesizedGenericArguments,
@@ -1985,6 +1990,9 @@ where
 {
     match node {
         crate::FieldMutability::None => crate::FieldMutability::None,
+        crate::FieldMutability::Restricted(_binding_0) => {
+            crate::FieldMutability::Restricted(f.fold_mut_restricted(_binding_0))
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -2906,6 +2914,22 @@ where
         path: f.fold_path(node.path),
         eq_token: node.eq_token,
         value: f.fold_expr(node.value),
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn fold_mut_restricted<F>(
+    f: &mut F,
+    node: crate::MutRestricted,
+) -> crate::MutRestricted
+where
+    F: Fold + ?Sized,
+{
+    crate::MutRestricted {
+        mut_token: node.mut_token,
+        paren_token: node.paren_token,
+        in_token: node.in_token,
+        path: Box::new(f.fold_path(*node.path)),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

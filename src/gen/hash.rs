@@ -1037,6 +1037,10 @@ impl Hash for crate::FieldMutability {
             crate::FieldMutability::None => {
                 state.write_u8(0u8);
             }
+            crate::FieldMutability::Restricted(v0) => {
+                state.write_u8(1u8);
+                v0.hash(state);
+            }
         }
     }
 }
@@ -1862,6 +1866,17 @@ impl Hash for crate::MetaNameValue {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::MutRestricted {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.in_token.hash(state);
+        self.path.hash(state);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::ParenthesizedGenericArguments {
     fn hash<H>(&self, state: &mut H)
     where
@@ -2548,7 +2563,8 @@ impl Hash for crate::TypeInfer {
     fn hash<H>(&self, _state: &mut H)
     where
         H: Hasher,
-    {}
+    {
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
@@ -2566,7 +2582,8 @@ impl Hash for crate::TypeNever {
     fn hash<H>(&self, _state: &mut H)
     where
         H: Hasher,
-    {}
+    {
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
@@ -2715,7 +2732,8 @@ impl Hash for crate::UseGlob {
     fn hash<H>(&self, _state: &mut H)
     where
         H: Hasher,
-    {}
+    {
+    }
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]

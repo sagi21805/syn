@@ -624,6 +624,11 @@ pub trait VisitMut {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_mut_restricted_mut(&mut self, i: &mut crate::MutRestricted) {
+        visit_mut_restricted_mut(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_parenthesized_generic_arguments_mut(
         &mut self,
         i: &mut crate::ParenthesizedGenericArguments,
@@ -1939,6 +1944,9 @@ where
 {
     match node {
         crate::FieldMutability::None => {}
+        crate::FieldMutability::Restricted(_binding_0) => {
+            v.visit_mut_restricted_mut(_binding_0);
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -2779,6 +2787,17 @@ where
     v.visit_path_mut(&mut node.path);
     skip!(node.eq_token);
     v.visit_expr_mut(&mut node.value);
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_mut_restricted_mut<V>(v: &mut V, node: &mut crate::MutRestricted)
+where
+    V: VisitMut + ?Sized,
+{
+    skip!(node.mut_token);
+    skip!(node.paren_token);
+    skip!(node.in_token);
+    v.visit_path_mut(&mut *node.path);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]

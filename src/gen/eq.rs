@@ -781,6 +781,11 @@ impl PartialEq for crate::FieldMutability {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (crate::FieldMutability::None, crate::FieldMutability::None) => true,
+            (
+                crate::FieldMutability::Restricted(self0),
+                crate::FieldMutability::Restricted(other0),
+            ) => self0 == other0,
+            _ => false,
         }
     }
 }
@@ -1454,6 +1459,16 @@ impl Eq for crate::MetaNameValue {}
 impl PartialEq for crate::MetaNameValue {
     fn eq(&self, other: &Self) -> bool {
         self.path == other.path && self.value == other.value
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::MutRestricted {}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::MutRestricted {
+    fn eq(&self, other: &Self) -> bool {
+        self.in_token == other.in_token && self.path == other.path
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
