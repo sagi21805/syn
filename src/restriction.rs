@@ -172,13 +172,45 @@ pub(crate) mod parsing {
 
     impl Parse for MutRestricted {
         fn parse(input: ParseStream) -> Result<Self> {
-            let content;
-            Ok(MutRestricted {
-                mut_token: input.parse()?,
-                paren_token: syn::parenthesized!(content in input),
-                in_token: content.parse()?,
-                path: content.parse()?,
-            })
+            let mut_token = input.parse()?;
+            if input.peek(token::Paren) {
+                let ahead = input.fork();
+                let content;
+                let paren_token = parenthesized!(content in ahead);
+                if content.peek(Token![crate])
+                    || content.peek(Token![self])
+                    || content.peek(Token![super])
+                {
+                    let path = content.call(Ident::parse_any)?;
+
+                    // Ensure there are no additional tokens within `content`.
+                    // Without explicitly checking, we may misinterpret a tuple
+                    // field as a restricted visibility, causing a parse error.
+                    // e.g. `pub (crate::A, crate::B)` (Issue #720).
+                    if content.is_empty() {
+                        input.advance_to(&ahead);
+                        return Ok(MutRestricted {
+                            mut_token,
+                            paren_token,
+                            in_token: None,
+                            path: Box::new(Path::from(path)),
+                        });
+                    }
+                } else if content.peek(Token![in]) {
+                    let in_token: Token![in] = content.parse()?;
+                    let path = content.call(Path::parse_mod_style)?;
+
+                    input.advance_to(&ahead);
+                    return Ok(MutRestricted {
+                        mut_token,
+                        paren_token,
+                        in_token: Some(in_token),
+                        path: Box::new(path),
+                    });
+                }
+                return Err(content.error("Expected token 'in', 'crate', 'self' or 'super'"));
+            }
+            Err(input.error("Expected paren token"))
         }
     }
 }
